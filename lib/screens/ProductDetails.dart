@@ -23,7 +23,7 @@ class ProductDetail extends StatelessWidget {
           children: <Widget>[
             Container(
               margin: EdgeInsets.all(5.0),
-              child: Image.asset(
+              child: Image.network(
                 _product.image,
               ),
             ),

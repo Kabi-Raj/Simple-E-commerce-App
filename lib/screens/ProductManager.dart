@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import '../tabs/CreateProduct.dart';
 import '../tabs/MyProduct.dart';
 import '../drawers/AllProductDrawer.dart';
+import '../scopedModel/MainScopedModel.dart';
 
 class ProductManager extends StatelessWidget {
+  final MainScopedModel model;
+
+  ProductManager(this.model);
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -25,7 +30,7 @@ class ProductManager extends StatelessWidget {
             ],
           ),
         ),
-        body: TabBarView(children: <Widget>[CreateProduct(), MyProduct()]),
+        body: TabBarView(children: <Widget>[CreateProduct(), MyProduct(model)]),
       ),
     );
   }

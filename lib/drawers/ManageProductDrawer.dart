@@ -33,8 +33,7 @@ class ManageProductDrawer extends StatelessWidget {
               leading: Icon(Icons.edit),
               title: Text('Manage Products'),
               onTap: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => ProductManager()));
+                Navigator.pushReplacementNamed(context, 'product manager');
               }),
           ListTile(
               leading: Icon(Icons.favorite),

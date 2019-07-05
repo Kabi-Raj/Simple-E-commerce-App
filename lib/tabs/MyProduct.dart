@@ -3,7 +3,24 @@ import './CreateProduct.dart';
 import 'package:scoped_model/scoped_model.dart';
 import '../scopedModel/MainScopedModel.dart';
 
-class MyProduct extends StatelessWidget {
+class MyProduct extends StatefulWidget {
+  final MainScopedModel model;
+
+  MyProduct(this.model);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _MyProductState();
+  }
+}
+
+class _MyProductState extends State<MyProduct> {
+  @override
+  initState() {
+    widget.model.fetchProductData();
+    super.initState();
+  }
+
   Widget _buildEditButton(
       BuildContext context, MainScopedModel model, int index) {
     return IconButton(
@@ -46,7 +63,7 @@ class MyProduct extends StatelessWidget {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundImage:
-                            AssetImage(model.products[index].image),
+                            NetworkImage(model.products[index].image),
                       ),
                       title: Text(
                         model.products[index].title,

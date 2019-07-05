@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/background.jpg'),
-            fit: BoxFit.fitHeight,
+            fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
                 Colors.white.withOpacity(0.5), BlendMode.dstATop),
           ),

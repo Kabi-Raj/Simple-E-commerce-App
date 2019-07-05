@@ -8,7 +8,7 @@ class WishListProduct extends StatelessWidget {
       children: <Widget>[
         ListTile(
           leading: CircleAvatar(
-            backgroundImage: AssetImage(model.wishlistProduct[index].image),
+            backgroundImage: NetworkImage(model.wishlistProduct[index].image),
           ),
           title: Text(
             model.wishlistProduct[index].title,

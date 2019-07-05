@@ -14,7 +14,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.height * 0.2;
+    //final width = MediaQuery.of(context).size.height * 0.2;
     Widget _buildProductName(List<Product> products) {
       return Container(
         margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -52,14 +52,15 @@ class ProductCard extends StatelessWidget {
       );
     }
 
-    Widget _buildFavoriteProduct(List<Product> products) {
+    Widget _buildFavoriteProduct() {
       return ScopedModelDescendant<MainScopedModel>(
         builder: (BuildContext context, Widget child, MainScopedModel model) {
           return IconButton(
             icon: Icon(
               Icons.favorite,
-              color:
-                  products[productIndex].isFavorite ? Colors.red : Colors.grey,
+              color: products[productIndex].isFavorite
+                  ? Colors.red
+                  : Colors.blueGrey,
               size: 30.0,
             ),
             onPressed: () {
@@ -88,18 +89,20 @@ class ProductCard extends StatelessWidget {
             Stack(children: <Widget>[
               Positioned(
                   child: Container(
-                margin: EdgeInsets.only(top: 15.0),
-                height: width,
-                child: Image.asset(products[productIndex].image),
+                margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+                child: FadeInImage(
+                    placeholder: AssetImage('assets/placeholder.png'),
+                    fit: BoxFit.cover,
+                    image: NetworkImage(products[productIndex].image)),
               )),
               Positioned(
                 child: _buildProductDetails(),
-                left: 160,
-                bottom: 3,
+                right: 10,
+                bottom: 0,
               ),
               Positioned(
-                child: _buildFavoriteProduct(products),
-                left: 160,
+                child: _buildFavoriteProduct(),
+                right: 10,
                 top: 7,
               ),
             ]),

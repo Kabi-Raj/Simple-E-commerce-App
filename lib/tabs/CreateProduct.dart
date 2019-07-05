@@ -17,7 +17,6 @@ class _CreateProductState extends State<CreateProduct> {
     'productTitle': null,
     'productDescription': null,
     'productPrice': null,
-    'productImage': 'assets/food.jpeg',
   };
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -80,21 +79,38 @@ class _CreateProductState extends State<CreateProduct> {
       return;
     }
     if (selectedProduct == null)
-      addProduct(Product(
-          title: _formData['productTitle'],
-          description: _formData['productDescription'],
-          price: _formData['productPrice'],
-          image: _formData['productImage'],
-          userEmail: model.authenticatedUser.email));
+      addProduct(_formData['productTitle'], _formData['productDescription'],
+              _formData['productPrice'], model.authenticatedUser.email)
+          .then((bool success) {
+        if (success)
+          Navigator.pushReplacementNamed(context, '/home')
+              .then((_) => setSelectedProduct(null));
+        else {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Something went wrong'),
+                  content: Text('Try after sometime'),
+                  actions: <Widget>[
+                    FlatButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text('Okay'))
+                  ],
+                );
+              });
+        }
+      });
     else
-      updateProduct(Product(
-          title: _formData['productTitle'],
-          description: _formData['productDescription'],
-          price: _formData['productPrice'],
-          image: _formData['productImage'],
-          userEmail: selectedProduct.userEmail));
-    Navigator.pushReplacementNamed(context, '/home')
-        .then((_) => setSelectedProduct(null)); //after saving the form set the selected product index nto null
+      updateProduct(_formData['productTitle'], _formData['productDescription'],
+              _formData['productPrice'], selectedProduct)
+          .then((bool success) {
+        Navigator.pushReplacementNamed(context, '/home')
+            .then(setSelectedProduct(null));
+      });
+    /*Navigator.pushReplacementNamed(context, '/home').then((_) =>
+        setSelectedProduct(
+            null));*/ //after saving the form set the selected product index nto null
   }
 
   Widget _buildSubmitProduct(GlobalKey<FormState> _formKey) {

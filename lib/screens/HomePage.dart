@@ -5,6 +5,10 @@ import '../scopedModel/MainScopedModel.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class HomePage extends StatelessWidget {
+  final MainScopedModel model;
+
+  HomePage(this.model);
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainScopedModel>(
@@ -26,7 +30,7 @@ class HomePage extends StatelessWidget {
             title: Text('Product List'),
             elevation: 10.0,
           ),
-          body: ProductsList(),
+          body: ProductsList(model),
         );
       },
     );

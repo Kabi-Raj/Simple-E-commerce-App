@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class Product {
-  final String title, description, price, image, userEmail;
+  final String title, description, price, image, userEmail, productId;
   final bool isFavorite;
 
   Product(
-      {@required this.title,
+      {@required this.productId,
+      @required this.title,
       @required this.description,
       @required this.price,
       @required this.image,

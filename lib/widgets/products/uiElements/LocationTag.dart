@@ -8,6 +8,7 @@ class LocationTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: 10.0),
       padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
       decoration: ShapeDecoration(
         shape: OutlineInputBorder(
