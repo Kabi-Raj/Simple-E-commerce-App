@@ -53,31 +53,51 @@ class _MyProductState extends State<MyProduct> {
               onDismissed: (DismissDirection direction) {
                 if (direction == DismissDirection.endToStart) {
                   model.selectProduct(index);
-                  model.deleteProduct();
+                  model.deleteProduct().then((bool success) {
+                    if (!success) {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Something went wrong'),
+                              content: Text('Try after sometime'),
+                              actions: <Widget>[
+                                FlatButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Okay'))
+                              ],
+                            );
+                          });
+                    }
+                  });
                 }
               },
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.all(5.0),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(model.products[index].image),
-                      ),
-                      title: Text(
-                        model.products[index].title,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        '₹ ' + model.products[index].price,
-                      ),
-                      trailing: _buildEditButton(context, model, index),
+              child: model.isLoading == true
+                  ? Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.all(5.0),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              radius: 30,
+                              backgroundImage:
+                                  NetworkImage(model.products[index].image),
+                            ),
+                            title: Text(
+                              model.products[index].title,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              '₹ ' + model.products[index].price,
+                            ),
+                            trailing: _buildEditButton(context, model, index),
+                          ),
+                        ),
+                        Divider(height: 2.0),
+                      ],
                     ),
-                  ),
-                  Divider(height: 2.0),
-                ],
-              ),
             );
           },
           itemCount: model.products.length,

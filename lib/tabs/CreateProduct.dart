@@ -94,23 +94,21 @@ class _CreateProductState extends State<CreateProduct> {
                   content: Text('Try after sometime'),
                   actions: <Widget>[
                     FlatButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.of(context).pop(),
                         child: Text('Okay'))
                   ],
                 );
               });
         }
       });
-    else
+    else {
       updateProduct(_formData['productTitle'], _formData['productDescription'],
-              _formData['productPrice'], selectedProduct)
-          .then((bool success) {
-        Navigator.pushReplacementNamed(context, '/home')
-            .then(setSelectedProduct(null));
-      });
-    /*Navigator.pushReplacementNamed(context, '/home').then((_) =>
-        setSelectedProduct(
-            null));*/ //after saving the form set the selected product index nto null
+          _formData['productPrice'], selectedProduct);
+
+      Navigator.pushReplacementNamed(context, '/home').then((_) =>
+          setSelectedProduct(
+              null)); //after saving the form set the selected product index nto null
+    }
   }
 
   Widget _buildSubmitProduct(GlobalKey<FormState> _formKey) {

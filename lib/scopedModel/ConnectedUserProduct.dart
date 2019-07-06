@@ -11,7 +11,7 @@ class ConnectedUserProduct extends Model {
   bool _isLoading = true;
 
   Future<bool> addProduct(
-      String title, String description, String price, String email) {
+      String title, String description, String price, String email) async {
     Map<String, dynamic> productDetail = {
       'title': title,
       'description': description,
@@ -22,16 +22,19 @@ class ConnectedUserProduct extends Model {
     }; // to post data to http we need Map object
     _isLoading = true;
     notifyListeners();
-    return http
-        .post('https://productlist-efaa0.firebaseio.com/Products',
-            body: json.encode(productDetail))
-        .then((http.Response response) {
+    try {
+      final http.Response response = await http.post(
+          'https://productlist-efaa0.firebaseio.com/Products.json',
+          body: json.encode(productDetail));
       if (response.statusCode != 200 && response.statusCode != 201) {
+        _isLoading = false;
+        notifyListeners();
         return false;
       }
       _isLoading = false;
       notifyListeners();
-      final Map<String, dynamic> id = json.decode(response.body);
+      final Map<String, dynamic> id = json
+          .decode(response.body); // we need to convert the Map object to json
       print(id['name']);
       _allProduct.add(Product(
           productId: id['name'],
@@ -42,8 +45,11 @@ class ConnectedUserProduct extends Model {
           userEmail: productDetail['userEmail'],
           isFavorite: false));
       return true;
-    }); // we need to convert the Map object to json
-    //notifyListeners();
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<Null> fetchProductData() {
@@ -148,19 +154,30 @@ class ProductScopeModel extends ConnectedUserProduct {
     return _allProduct.where((Product product) => product.isFavorite).toList();
   }
 
-  void deleteProduct() {
+  Future<bool> deleteProduct() {
     //_product.remove(selectedProduct);
     _isLoading = true;
+    notifyListeners();
     String deletedProductID = selectedProducts.productId;
     _allProduct.removeAt(_selectedProductIndex);
     _selectedProductIndex = null;
     notifyListeners();
-    http
+    return http
         .delete(
-            'https://productlist-efaa0.firebaseio.com/Products/$deletedProductID.json')
+            'https://productlist-efaa0.firebaseio.com/Products/$deletedProductID')
         .then((http.Response response) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
       _isLoading = false;
       notifyListeners();
+      return true;
+    }).catchError((error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
     });
   }
 
@@ -190,6 +207,8 @@ class ProductScopeModel extends ConnectedUserProduct {
           image:
               'https://www.klondikebar.com/wp-content/uploads/sites/49/2015/09/double-chocolate-ice-cream-bar.png',
           userEmail: selectedProduct.userEmail);
+      selectProduct(null);
+      notifyListeners();
     });
   }
 
