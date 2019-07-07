@@ -45,7 +45,9 @@ class _ProductListState extends State<ProductsList> {
         child: CircularProgressIndicator(),
       );
     return RefreshIndicator(
-        child: _content, onRefresh: () => model.fetchProductData());
+        backgroundColor: Theme.of(context).primaryColor,
+        child: _content,
+        onRefresh: () => model.fetchProductData());
   }
 
   @override

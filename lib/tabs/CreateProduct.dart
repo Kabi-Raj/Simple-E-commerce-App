@@ -114,13 +114,19 @@ class _CreateProductState extends State<CreateProduct> {
   Widget _buildSubmitProduct(GlobalKey<FormState> _formKey) {
     return ScopedModelDescendant<MainScopedModel>(
         builder: (BuildContext context, Widget child, MainScopedModel model) {
-      return RaisedButton(
-        elevation: 10.0,
-        color: Theme.of(context).primaryColor,
-        onPressed: () => _submitForm(model.addProduct, model.updateProduct,
-            model.selectedProducts, model.selectProduct, model),
-        child: Text('Save'),
-      );
+      return model.isLoading
+          ? Center(child: CircularProgressIndicator(),)
+          : RaisedButton(
+              elevation: 10.0,
+              color: Theme.of(context).primaryColor,
+              onPressed: () => _submitForm(
+                  model.addProduct,
+                  model.updateProduct,
+                  model.selectedProducts,
+                  model.selectProduct,
+                  model),
+              child: Text('Save'),
+            );
     });
   }
 

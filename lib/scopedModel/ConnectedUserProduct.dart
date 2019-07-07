@@ -6,9 +6,90 @@ import 'package:http/http.dart' as http; //for http
 
 class ConnectedUserProduct extends Model {
   List<Product> _allProduct = [];
-  int _selectedProductIndex;
+  String _selectedProductID;
   User authenticatedUser;
   bool _isLoading = true;
+}
+
+class UserScopeModel extends ConnectedUserProduct {
+  void login(String email, password) {
+    authenticatedUser =
+        User(id: 'sbfvjhsbfjk', email: email, password: password);
+  }
+}
+
+class ProductScopeModel extends ConnectedUserProduct {
+  bool favoriteProduct = false;
+  bool displayProductMode = false;
+
+  List<Product> get products {
+    //get all products
+    if (displayProductMode)
+      return _allProduct
+          .where((Product product) => product.isFavorite)
+          .toList();
+    else
+      return List.from(_allProduct);
+  }
+
+  void displayMode() {
+    displayProductMode = !displayProductMode;
+    notifyListeners();
+  }
+
+  bool get displayFavoriteProductMode {
+    return displayProductMode;
+  }
+
+  void selectProduct(String productID) {
+    //to select product index while swiping product right to left
+    _selectedProductID = productID;
+    notifyListeners();
+  }
+
+  Product get selectedProducts {
+    if (_selectedProductID == null) {
+      //if product is not selected then simply return
+      return null;
+    }
+
+    return products.firstWhere((Product product) {
+      return product.productId == _selectedProductID;
+    });
+    //return _allProduct[_selectedProductIndex];
+  }
+
+  int get selectedProductIndex {
+    return products.indexWhere((Product product) {
+      return product.productId == _selectedProductID;
+    });
+  }
+
+  void selectedFavoriteProduct(int index, Product p) {
+    //to select product index while swiping product right to left
+    //bool isCurrentlyFavorite = favoriteProduct;
+
+    bool newFavorite = !favoriteProduct;
+    Product product = Product(
+        //create new instance for Product bcz Product is final so dont want to change directly the original product
+        productId: p.productId,
+        userEmail: p.userEmail,
+        title: p.title,
+        description: p.description,
+        price: p.price,
+        image: p.image,
+        isFavorite: newFavorite);
+    int a = _allProduct.indexOf(p);
+    print('index: $a');
+    _allProduct[a] = product;
+    favoriteProduct = newFavorite;
+    _selectedProductID = null;
+    notifyListeners(); //to update the changes rebuild the widget
+  }
+
+  List<Product> get wishlistProduct {
+    return _allProduct.where((Product product) => product.isFavorite).toList();
+  }
 
   Future<bool> addProduct(
       String title, String description, String price, String email) async {
@@ -82,89 +163,19 @@ class ConnectedUserProduct extends Model {
       _allProduct = productList;
     });
   }
-}
-
-class UserScopeModel extends ConnectedUserProduct {
-  void login(String email, password) {
-    authenticatedUser =
-        User(id: 'sbfvjhsbfjk', email: email, password: password);
-  }
-}
-
-class ProductScopeModel extends ConnectedUserProduct {
-  bool favoriteProduct = false;
-  bool displayProductMode = false;
-
-  List<Product> get products {
-    //get all products
-    if (displayProductMode)
-      return _allProduct
-          .where((Product product) => product.isFavorite)
-          .toList();
-    else
-      return List.from(_allProduct);
-  }
-
-  void displayMode() {
-    displayProductMode = !displayProductMode;
-    notifyListeners();
-  }
-
-  bool get displayFavoriteProductMode {
-    return displayProductMode;
-  }
-
-  void selectProduct(int index) {
-    //to select product index while swiping product right to left
-    _selectedProductIndex = index;
-    notifyListeners();
-  }
-
-  Product get selectedProducts {
-    if (_selectedProductIndex == null) {
-      //if product is not selected then simply return
-      return null;
-    }
-    return _allProduct[_selectedProductIndex];
-  }
-
-  void selectedFavoriteProduct(int index, Product p) {
-    //to select product index while swiping product right to left
-    //bool isCurrentlyFavorite = favoriteProduct;
-
-    bool newFavorite = !favoriteProduct;
-    Product product = Product(
-        //create new instance for Product bcz Product is final so dont want to change directly the original product
-        productId: p.productId,
-        userEmail: p.userEmail,
-        title: p.title,
-        description: p.description,
-        price: p.price,
-        image: p.image,
-        isFavorite: newFavorite);
-    int a = _allProduct.indexOf(p);
-    print('index: $a');
-    _allProduct[a] = product;
-    favoriteProduct = newFavorite;
-    _selectedProductIndex = null;
-    notifyListeners(); //to update the changes rebuild the widget
-  }
-
-  List<Product> get wishlistProduct {
-    return _allProduct.where((Product product) => product.isFavorite).toList();
-  }
 
   Future<bool> deleteProduct() {
     //_product.remove(selectedProduct);
     _isLoading = true;
     notifyListeners();
     String deletedProductID = selectedProducts.productId;
-    _allProduct.removeAt(_selectedProductIndex);
-    _selectedProductIndex = null;
+
+    _allProduct.removeAt(selectedProductIndex);
+    _selectedProductID = null;
     notifyListeners();
     return http
         .delete(
-            'https://productlist-efaa0.firebaseio.com/Products/$deletedProductID')
+            'https://productlist-efaa0.firebaseio.com/Products/$deletedProductID.json')
         .then((http.Response response) {
       if (response.statusCode != 200 && response.statusCode != 201) {
         _isLoading = false;
@@ -199,7 +210,7 @@ class ProductScopeModel extends ConnectedUserProduct {
         .then((http.Response response) {
       _isLoading = false;
       notifyListeners();
-      _allProduct[_selectedProductIndex] = Product(
+      Product product = Product(
           productId: selectedProduct.productId,
           title: title,
           description: description,
@@ -207,6 +218,7 @@ class ProductScopeModel extends ConnectedUserProduct {
           image:
               'https://www.klondikebar.com/wp-content/uploads/sites/49/2015/09/double-chocolate-ice-cream-bar.png',
           userEmail: selectedProduct.userEmail);
+      _allProduct[selectedProductIndex] = product;
       selectProduct(null);
       notifyListeners();
     });
@@ -214,19 +226,28 @@ class ProductScopeModel extends ConnectedUserProduct {
 
   void undoWishlist(int index, Product p) {
     Product product = Product(
-        productId: wishlistProduct[index].productId,
-        title: wishlistProduct[index].title,
-        description: wishlistProduct[index].description,
-        price: wishlistProduct[index].price,
-        image: wishlistProduct[index].image,
+        productId: wishlistProduct[selectedProductIndex].productId,
+        title: wishlistProduct[selectedProductIndex].title,
+        description: wishlistProduct[selectedProductIndex].description,
+        price: wishlistProduct[selectedProductIndex].price,
+        image: wishlistProduct[selectedProductIndex].image,
         isFavorite: false,
-        userEmail: wishlistProduct[index].userEmail);
+        userEmail: wishlistProduct[selectedProductIndex].userEmail);
     int a = _allProduct.indexOf(p);
     _allProduct[a] = product;
     //_selectedProductIndex=null;
     notifyListeners();
   }
 }
+
+/*void fetchProductId() async {
+  http.Response response =
+      await http.get('https://productlist-efaa0.firebaseio.com/Products.json');
+
+  if (response.statusCode == 200 && response.statusCode == 201) {
+    final List<Map<String,dynamic>> productlist=json.decode(response.body);
+  }
+}*/
 
 class UtilityModel extends ConnectedUserProduct {
   bool get isLoading {

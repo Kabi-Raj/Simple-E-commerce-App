@@ -64,7 +64,7 @@ class ProductCard extends StatelessWidget {
               size: 30.0,
             ),
             onPressed: () {
-              model.selectProduct(productIndex);
+              model.selectProduct(model.products[productIndex].productId);
               //model.favoriteProductSelected();
               //if(products[productIndex].productId==model.selectedProducts.productId)
               model.selectedFavoriteProduct(
