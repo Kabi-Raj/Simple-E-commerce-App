@@ -7,19 +7,22 @@ import '../../scopedModel/MainScopedModel.dart';
 import '../../models/Product.dart';
 
 class ProductCard extends StatelessWidget {
-  final int productIndex;
+  final String productID;
   final List<Product> products;
 
-  ProductCard(this.productIndex, this.products);
+  ProductCard(this.productID, this.products);
 
   @override
   Widget build(BuildContext context) {
+    Product product = products.firstWhere((Product p) {
+      return p.productId == productID;
+    });
     //final width = MediaQuery.of(context).size.height * 0.2;
     Widget _buildProductName(List<Product> products) {
       return Container(
         margin: EdgeInsets.symmetric(vertical: 10.0),
         child: Text(
-          products[productIndex].title,
+          product.title,
           style: TextStyle(
               fontSize: 20.0,
               fontFamily: 'Oswald',
@@ -44,7 +47,7 @@ class ProductCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProductDetail(productIndex),
+                builder: (context) => ProductDetail(product),
               ),
             );
           },
@@ -58,19 +61,16 @@ class ProductCard extends StatelessWidget {
           return IconButton(
             icon: Icon(
               Icons.favorite,
-              color: products[productIndex].isFavorite
-                  ? Colors.red
-                  : Colors.blueGrey,
+              color: product.isFavorite ? Colors.red : Colors.blueGrey,
               size: 30.0,
             ),
             onPressed: () {
-              model.selectProduct(model.products[productIndex].productId);
+              model.selectProduct(product.productId);
               //model.favoriteProductSelected();
               //if(products[productIndex].productId==model.selectedProducts.productId)
-              model.selectedFavoriteProduct(
-                  productIndex, model.products[productIndex]);
-              print('product index: $productIndex: ' +
-                  'isFavorite: ${products[productIndex].isFavorite}');
+              model.selectedFavoriteProduct(product);
+              print('product index: $productID: ' +
+                  'isFavorite: ${product.isFavorite}');
             },
           );
         },
@@ -92,8 +92,8 @@ class ProductCard extends StatelessWidget {
                 margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
                 child: FadeInImage(
                     placeholder: AssetImage('assets/placeholder.png'),
-                    fit: BoxFit.cover,
-                    image: NetworkImage(products[productIndex].image)),
+                    fit: BoxFit.fill,
+                    image: NetworkImage(product.image)),
               )),
               Positioned(
                 child: _buildProductDetails(),
@@ -110,7 +110,7 @@ class ProductCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _buildProductName(products),
-                PriceTag(products[productIndex].price),
+                PriceTag(product.price),
               ],
             ),
             LocationTag('Bangalore, Marathalli'),

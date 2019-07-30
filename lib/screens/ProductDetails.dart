@@ -5,16 +5,15 @@ import 'package:scoped_model/scoped_model.dart';
 import '../scopedModel/MainScopedModel.dart';
 
 class ProductDetail extends StatelessWidget {
-  final int productIndex;
+  final Product product;
 
-  ProductDetail(this.productIndex);
+  ProductDetail(this.product);
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(child: ScopedModelDescendant<MainScopedModel>(
         builder: (BuildContext context, Widget child, MainScopedModel model) {
-      final Product _product =
-          model.products[productIndex]; //getter used to get the product
+      //getter used to get the product
       return Scaffold(
         appBar: AppBar(
           title: Text('Product detail'),
@@ -24,14 +23,14 @@ class ProductDetail extends StatelessWidget {
             Container(
               margin: EdgeInsets.all(5.0),
               child: Image.network(
-                _product.image,
+                product.image,
               ),
             ),
             Container(
               margin: EdgeInsets.all(5.0),
             ),
             Text(
-              _product.description,
+              product.description,
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
             ),
             Container(

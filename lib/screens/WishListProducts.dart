@@ -8,17 +8,17 @@ class WishListProduct extends StatelessWidget {
       children: <Widget>[
         ListTile(
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(model.wishlistProduct[index].image),
+            backgroundImage: NetworkImage(model.wishListProduct[index].image),
           ),
           title: Text(
-            model.wishlistProduct[index].title,
+            model.wishListProduct[index].title,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),
           ),
-          subtitle: Text('₹ ' + model.wishlistProduct[index].price),
+          subtitle: Text('₹ ' + model.wishListProduct[index].price),
           trailing: IconButton(
               icon: Icon(Icons.delete),
               onPressed: () =>
-                  model.undoWishlist(index, model.wishlistProduct[index])),
+                  model.removeWishList(index, model.wishListProduct[index])),
         ),
         Divider(
           height: 2.0,
@@ -35,10 +35,10 @@ class WishListProduct extends StatelessWidget {
         appBar: AppBar(
           title: Text('WishList products'),
         ),
-        body: model.wishlistProduct.length > 0
+        body: model.wishListProduct.length > 0
             ? ListView.builder(
                 shrinkWrap: true,
-                itemCount: model.wishlistProduct.length,
+                itemCount: model.wishListProduct.length,
                 itemBuilder: (context, int index) => WishList(model, index))
             : Container(
                 child: Text(

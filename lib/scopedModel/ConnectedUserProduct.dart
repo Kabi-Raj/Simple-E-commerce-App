@@ -3,18 +3,76 @@ import '../models/Product.dart';
 import '../models/User.dart';
 import 'dart:convert'; //to convert data
 import 'package:http/http.dart' as http; //for http
+import '../models/Auth.dart';
 
 class ConnectedUserProduct extends Model {
   List<Product> _allProduct = [];
   String _selectedProductID;
   User authenticatedUser;
-  bool _isLoading = true;
+  bool _isLoading = false;
 }
 
 class UserScopeModel extends ConnectedUserProduct {
-  void login(String email, password) {
-    authenticatedUser =
-        User(id: 'sbfvjhsbfjk', email: email, password: password);
+  Future<Map<String, dynamic>> authUser(String email, String password,
+      [Auth authMode = Auth.Login]) async {
+    _isLoading = true;
+    notifyListeners();
+    Map<String, dynamic> _authValue = {'email': email, 'password': password};
+    http.Response response;
+    Map<String, dynamic> errorCode;
+    if (authMode == Auth.Login) {
+      response = await http.post(
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDhLSjiKNhqMrRws4d1MpErLcs0Gf85T1M',
+          body: json.encode(_authValue));
+      errorCode = json.decode(response.body);
+      authenticatedUser = User(
+          id: errorCode['localId'], email: email, token: errorCode['idToken']);
+    }
+
+    if (authMode == Auth.Signup) {
+      response = await http.post(
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key= AIzaSyDhLSjiKNhqMrRws4d1MpErLcs0Gf85T1M',
+          body: json.encode(_authValue),
+          headers: {'Content-Type': 'application/json'});
+      errorCode = json.decode(response.body);
+    }
+    /*print(errorCode['localId']);
+    print('error: ');
+    print(errorCode['email']);
+    print(response.body);
+    print(errorCode['error']['message']);
+    print(errorCode['error']['message']);*/
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': true, 'message': 'Authentication successful'};
+    }
+
+    if (errorCode['error']['message'] == 'EMAIL_NOT_FOUND') {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': 'EMAIL_NOT_FOUND', 'message': 'This email not found'};
+    }
+    if (errorCode['error']['message'] == 'INVALID_PASSWORD') {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': 'INVALID_PASSWORD', 'message': 'Invalid password'};
+    }
+    if (errorCode['error']['message'] == 'USER_DISABLED') {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': 'USER_DISABLED', 'message': 'Your email is disabled'};
+    }
+    if (errorCode['error']['message'] == 'EMAIL_EXISTS') {
+      _isLoading = false;
+      notifyListeners();
+      return {
+        'success': 'EMAIL_EXISTS',
+        'message': 'This email already exists'
+      };
+    }
+    return {};
   }
 }
 
@@ -65,7 +123,7 @@ class ProductScopeModel extends ConnectedUserProduct {
     });
   }
 
-  void selectedFavoriteProduct(int index, Product p) {
+  void selectedFavoriteProduct(Product p) {
     //to select product index while swiping product right to left
     //bool isCurrentlyFavorite = favoriteProduct;
 
@@ -85,10 +143,6 @@ class ProductScopeModel extends ConnectedUserProduct {
     favoriteProduct = newFavorite;
     _selectedProductID = null;
     notifyListeners(); //to update the changes rebuild the widget
-  }
-
-  List<Product> get wishlistProduct {
-    return _allProduct.where((Product product) => product.isFavorite).toList();
   }
 
   Future<bool> addProduct(
@@ -224,19 +278,24 @@ class ProductScopeModel extends ConnectedUserProduct {
     });
   }
 
-  void undoWishlist(int index, Product p) {
+  void removeWishList(int index, Product p) {
+    print(wishListProduct[index].title);
     Product product = Product(
-        productId: wishlistProduct[selectedProductIndex].productId,
-        title: wishlistProduct[selectedProductIndex].title,
-        description: wishlistProduct[selectedProductIndex].description,
-        price: wishlistProduct[selectedProductIndex].price,
-        image: wishlistProduct[selectedProductIndex].image,
+        productId: wishListProduct[index].productId,
+        title: wishListProduct[index].title,
+        description: wishListProduct[index].description,
+        price: wishListProduct[index].price,
+        image: wishListProduct[index].image,
         isFavorite: false,
-        userEmail: wishlistProduct[selectedProductIndex].userEmail);
-    int a = _allProduct.indexOf(p);
-    _allProduct[a] = product;
-    //_selectedProductIndex=null;
+        userEmail: wishListProduct[index].userEmail);
+    //int a = _allProduct.indexOf(p);
+    _allProduct[index] = product;
+    _selectedProductID = null;
     notifyListeners();
+  }
+
+  List<Product> get wishListProduct {
+    return _allProduct.where((Product product) => product.isFavorite).toList();
   }
 }
 

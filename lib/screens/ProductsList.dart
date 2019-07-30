@@ -36,7 +36,7 @@ class _ProductListState extends State<ProductsList> {
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) =>
               //print('itemid: $index');
-              ProductCard(index, model.products),
+              ProductCard(model.products[index].productId, model.products),
           itemCount: model.products.length,
         ),
       );

@@ -115,7 +115,9 @@ class _CreateProductState extends State<CreateProduct> {
     return ScopedModelDescendant<MainScopedModel>(
         builder: (BuildContext context, Widget child, MainScopedModel model) {
       return model.isLoading
-          ? Center(child: CircularProgressIndicator(),)
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
           : RaisedButton(
               elevation: 10.0,
               color: Theme.of(context).primaryColor,
@@ -162,12 +164,18 @@ class _CreateProductState extends State<CreateProduct> {
       builder: (BuildContext context, Widget child, MainScopedModel model) {
         return model.selectedProducts == null
             ? editProduct()
-            : Scaffold(
-                appBar: AppBar(
-                  title: Text('Edit Product'),
+            : WillPopScope(
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: Text('Edit Product'),
+                  ),
+                  body: editProduct(model.selectedProducts),
                 ),
-                body: editProduct(model.selectedProducts),
-              );
+                onWillPop: () {
+                  model.selectProduct(null);
+                  Navigator.pop(context, true);
+                  return Future.value(false);
+                });
       },
     );
   }
