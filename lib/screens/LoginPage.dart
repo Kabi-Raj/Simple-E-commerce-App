@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
               key: _formKey,
               child: Container(
                 decoration: ShapeDecoration(
-                    color: Colors.grey,
+                    color: Colors.blueGrey[100],
                     shadows: [
                       BoxShadow(color: Colors.blue,spreadRadius: 1.0),
                     ],

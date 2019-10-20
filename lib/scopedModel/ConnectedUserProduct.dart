@@ -10,6 +10,8 @@ class ConnectedUserProduct extends Model {
   String _selectedProductID;
   User authenticatedUser;
   bool _isLoading = false;
+  http.Response response;
+  Map<String, dynamic> errorCode;
 }
 
 class UserScopeModel extends ConnectedUserProduct {
@@ -18,15 +20,10 @@ class UserScopeModel extends ConnectedUserProduct {
     _isLoading = true;
     notifyListeners();
     Map<String, dynamic> _authValue = {'email': email, 'password': password};
-    http.Response response;
-    Map<String, dynamic> errorCode;
     if (authMode == Auth.Login) {
       response = await http.post(
           'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDhLSjiKNhqMrRws4d1MpErLcs0Gf85T1M',
           body: json.encode(_authValue));
-      errorCode = json.decode(response.body);
-      authenticatedUser = User(
-          id: errorCode['localId'], email: email, token: errorCode['idToken']);
     }
 
     if (authMode == Auth.Signup) {
@@ -34,14 +31,18 @@ class UserScopeModel extends ConnectedUserProduct {
           'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key= AIzaSyDhLSjiKNhqMrRws4d1MpErLcs0Gf85T1M',
           body: json.encode(_authValue),
           headers: {'Content-Type': 'application/json'});
-      errorCode = json.decode(response.body);
     }
-    /*print(errorCode['localId']);
-    print('error: ');
+
+    errorCode = json.decode(response.body);
+    print(errorCode['localId']);
+    /*print('error: ');
     print(errorCode['email']);
     print(response.body);
     print(errorCode['error']['message']);
     print(errorCode['error']['message']);*/
+
+    authenticatedUser = User(
+        id: errorCode['localId'], email: email, token: errorCode['idToken']);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       _isLoading = false;
@@ -187,13 +188,16 @@ class ProductScopeModel extends ConnectedUserProduct {
     }
   }
 
-  Future<Null> fetchProductData() {
-    /*_isLoading = true;
-    notifyListeners();*/
-    return http
-        .get('https://productlist-efaa0.firebaseio.com/Products.json')
+  Future<Null> fetchProductData() async {
+    _isLoading = true;
+    notifyListeners();
+    response = await http
+        .get('https://productlist-efaa0.firebaseio.com/Products.json?')
         .then((http.Response response) {
       //print(response.body);
+      Map<String, dynamic> responseData = json.decode(response.body);
+      print(responseData);
+      print(authenticatedUser.token);
       _isLoading = false;
       notifyListeners();
 
@@ -201,7 +205,7 @@ class ProductScopeModel extends ConnectedUserProduct {
       if (productListData == null) {
         _isLoading = false;
         notifyListeners();
-        return;
+        //return;
       }
       final List<Product> productList = [];
       productListData.forEach((String id, dynamic productData) {
@@ -215,7 +219,10 @@ class ProductScopeModel extends ConnectedUserProduct {
         productList.add(product);
       });
       _allProduct = productList;
+      return response;
     });
+
+    //return response;
   }
 
   Future<bool> deleteProduct() {
